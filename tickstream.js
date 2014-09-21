@@ -23,7 +23,7 @@ util.inherits(TickStream, Readable);
 
 var WAIT_MILLIS = 40;
 var CURRENCY_PAIRS = 10;
-var MAX_TICKS = 2;
+var MAX_TICKS = 100000;
 
 function TickStream(opt) {
   Readable.call(this, opt);
