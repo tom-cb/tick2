@@ -3,13 +3,16 @@ App for loading tick data
 # What is a tick?
 Financial price info at a specific time.
 In the CSV format we are using a tick looks as follows:
-EUR/GBP,20130101 21:59:59.592,0.81156,0.81379
+    EUR/GBP,20130101 21:59:59.592,0.81156,0.81379
 
 This corresponds to:
-Pair,Date,a,b (Where a and b probably represent something like high/low, or bid/ask)
+    Pair,Date,a,b
+(Where a and b probably represent something like high/low, or bid/ask)
 
 # What's this app?
-loader.js reads in a stream of tick data in CSV format and inserts it into DB
+loader.js reads in a stream of tick data in CSV format and inserts it into DB.
+
+
 As each tick is handled, a document representing 1 minute is updated.
 All ticks within that minute will be included in the 1 doc.
 When a new minute starts, a new doc will be created.
@@ -17,8 +20,10 @@ When a new minute starts, a new doc will be created.
 It's also possible for each tick to be stored as a separate document.
 Just uncomment the appropriate lines in loader.js.
 
+
 tickstream.js generates the input data in CSV format.
 This removes the need to have large sample CSV files as input.
+
 
 Sample document for a 1 minute rollup which contains 2 ticks:
 
