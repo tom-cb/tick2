@@ -21,9 +21,12 @@ var util = require('util');
 
 util.inherits(TickStream, Readable);
 
-var WAIT_MILLIS = 40;
-var CURRENCY_PAIRS = 10;
+var WAIT_MILLIS = 20;
+var CURRENCY_PAIRS = 50;
 var MAX_TICKS = 100000;
+var CURRENCY_ONE = process.env.CURRENCY_ONE;
+var CURRENCY_TWO = process.env.CURRENCY_TWO;
+
 
 function TickStream(opt) {
   Readable.call(this, opt);
@@ -49,6 +52,11 @@ TickStream.prototype._read = function() {
 };
 
 function genData(stream) {
+  var now = new Date().setTimeToNow();
+  var span = new Date.TimeSpan(now - stream._timeIndex);
+ 
+  console.log(span.getMilliseconds());
+ 
   stream._timeIndex.setTimeToNow();
   // Mark that we've finished the wait period
   stream._waiting = false;
@@ -59,13 +67,14 @@ function genData(stream) {
   else if (millis.length == 1) {millis = '00' + millis; }
  
   dateStr = stream._timeIndex.toString("yyyyMMdd HH:mm:ss") + "." + millis; 
+
   //console.log("datetime: " + dateStr);
 
   output = '';
   // Build a string with N lines, each representing a currency pair
   // The price values are still fixed at 0.81... for now.
   for (i = 0; i < CURRENCY_PAIRS; i++) {
-    var str = 'AA'+i+'/BB'+i+',' + dateStr + ',0.81156,0.81379\n';
+    var str = CURRENCY_ONE +i+ '/' + CURRENCY_TWO +i+',' + dateStr + ',0.81156,0.81379\n';
     //console.log(str);
     output += str;
   }

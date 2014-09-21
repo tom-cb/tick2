@@ -137,7 +137,7 @@ var dbGetQueue = async.queue(function(data, callback) {
             //Someone modified this minute rollup inbetween us reading and writing the update
             // Schedule this tick to be pushed back into the async queue for processing, 100milliseconds in future
             setTimeout(function(data, err, result) {
-              console.log("CAS mismatch: " + data.key);
+              //console.log("CAS mismatch: " + data.key);
               casMismatches++;
               dbGetQueue.push(data, function(err,result) {
                 if (typeof(err) != 'undefined') { console.log(err) }
@@ -149,7 +149,7 @@ var dbGetQueue = async.queue(function(data, callback) {
     }
     callback(err, result);
   });
-}, 10); // concurrency val for async queue
+}, 100); // concurrency val for async queue
 
 var dbQueue = async.queue(function(data, callback) {
   // Store data to the DB
@@ -160,7 +160,9 @@ var dbQueue = async.queue(function(data, callback) {
      //console.log("setting: " + data.key);
      cbSet.set(data.key, data.value, data.setOptions, function(err, result) {
        if (err) console.log("SET FAILED: " + err);
-       if (casMismatches != 0) { console.log("cas mismatches: " + casMismatches); }
+       if (casMismatches >= 100) { 
+         console.log("cas mismatches: " + casMismatches);
+       }
 
        callback(err, result);
      });
@@ -174,7 +176,7 @@ var dbQueue = async.queue(function(data, callback) {
   } else {
      console.log("INVALID OPTYPE FOR STORE");
   }
-}, 10); //concurrency val for async queue
+}, 100); //concurrency val for async queue
 
 
 // If the db queue is saturated, we pause the parser
