@@ -98,7 +98,7 @@ var dbGetQueue = async.queue(function(data, callback) {
               //Someone else created the new minute doc before us
               //Push this tick back into the async queue for retry
 
-              //console.log("Clash on add, retrying read");
+              console.log("Clash on add, retrying read");
               addFailures++;
               dbGetQueue.push(data, function(err,result) {
               //if (typeof(err) != 'undefined') { console.log(err) }
@@ -149,7 +149,7 @@ var dbGetQueue = async.queue(function(data, callback) {
     }
     callback(err, result);
   });
-}, 100); // concurrency val for async queue
+}, 10); // concurrency val for async queue
 
 var dbQueue = async.queue(function(data, callback) {
   // Store data to the DB
@@ -160,7 +160,7 @@ var dbQueue = async.queue(function(data, callback) {
      //console.log("setting: " + data.key);
      cbSet.set(data.key, data.value, data.setOptions, function(err, result) {
        if (err) console.log("SET FAILED: " + err);
-       if (casMismatches >= 100) { 
+       if (casMismatches > 0) { 
          console.log("cas mismatches: " + casMismatches);
        }
 
@@ -169,14 +169,14 @@ var dbQueue = async.queue(function(data, callback) {
   } else if (data.opType === 'add') {
      //console.log("adding: " + data.key);
      cbSet.add(data.key, data.value, function(err, result) {
-       //if (err) console.log("ADD FAILED: " + err);
+       if (err) console.log("ADD FAILED: " + err);
        //console.log("add failures: " +  addFailures);
        callback(err, result);
      });
   } else {
      console.log("INVALID OPTYPE FOR STORE");
   }
-}, 100); //concurrency val for async queue
+}, 10); //concurrency val for async queue
 
 
 // If the db queue is saturated, we pause the parser

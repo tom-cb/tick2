@@ -21,8 +21,8 @@ var util = require('util');
 
 util.inherits(TickStream, Readable);
 
-var WAIT_MILLIS = 20;
-var CURRENCY_PAIRS = 50;
+var WAIT_MILLIS = 100;
+var CURRENCY_PAIRS = 10;
 var MAX_TICKS = 100000;
 var CURRENCY_ONE = process.env.CURRENCY_ONE;
 var CURRENCY_TWO = process.env.CURRENCY_TWO;
@@ -55,7 +55,7 @@ function genData(stream) {
   var now = new Date().setTimeToNow();
   var span = new Date.TimeSpan(now - stream._timeIndex);
  
-  console.log(span.getMilliseconds());
+  //console.log(span.getMilliseconds());
  
   stream._timeIndex.setTimeToNow();
   // Mark that we've finished the wait period
