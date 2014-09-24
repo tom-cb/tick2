@@ -20,7 +20,7 @@ server = http.createServer(function (request, response) {
   console.log("processing request");
 
   // choose between 1 and 5 minutes worth of data
-  var datePeriod = randomInt(1,10);
+  var datePeriod = randomInt(1,300);
   console.log("rand: " + datePeriod);
   // We're using 10 seconds in the past as our start time
   // Just because we may not have generated the data for this second yet
@@ -51,8 +51,8 @@ server = http.createServer(function (request, response) {
     function(err, results) {
       var res = '';
       for (var k in results) {
-        console.log(k);
-        console.log(JSON.stringify(results[k], null, 4));
+        //console.log(k);
+        //console.log(JSON.stringify(results[k], null, 4));
         var res = res +  JSON.stringify(results[k].value);
       } 
       response.write(res);

@@ -56,7 +56,8 @@ var dbGetQueue = async.queue(function(data, callback) {
   var tick = data.value;
   var key = data.key;
   //console.log(tick);
-  console.log("key: " + key);
+  //console.log("key: " + key);
+  //console.log("data: \n" + JSON.stringify(data));
 
   // Uncomment to enable tracking of time spent on db call
   //console.time("dbget" + key);
@@ -75,6 +76,7 @@ var dbGetQueue = async.queue(function(data, callback) {
       var mt = {};
       mt.pair = tick.pair;
       mt.count = 1;
+      mt.date = data.date;
       mt.total_a = tick.a;
       mt.total_b = tick.b;
       mt.avg_a = tick.a;
@@ -105,6 +107,14 @@ var dbGetQueue = async.queue(function(data, callback) {
             });
           }
         }
+       else if (data.timeResolution === 'seconds') {
+         //console.log("successful op at seconds res");
+         //data.key = tick.date.slice(0,-7) + tick.pair;
+         //data.timeResolution = 'minutes';
+         //dbGetQueue.push(data, function(err,result) {
+         //     //if (typeof(err) != 'undefined') { console.log(err) }
+         //   });
+       }
       });
     } else {
       // Successfully retrieved doc for this minute
@@ -113,12 +123,49 @@ var dbGetQueue = async.queue(function(data, callback) {
       //console.timeEnd("dbget" + key);
       //console.log("res: %j", result);
       var val = result.value;
-      val.count++;
-      val.total_a = Number(val.total_a) + Number(tick.a);
-      val.total_b = Number(val.total_b) + Number(tick.b);
-      val.avg_a = (val.total_a / val.count); 
-      val.avg_b = (val.total_b / val.count); 
-      val.ticks.push(tick);
+//      val.count++;
+      if (data.timeResolution === 'minutes') {
+        var match = false;
+        var tot_a = 0;
+        var tot_b = 0;
+        for (var i = 0; i < val.ticks.length; i++) {
+          //console.log("testing compare of: " + val.ticks[i].date + " with " + data.date);
+          if (val.ticks[i].date === data.date) {
+            //console.log("Found matching tick: " + data.date); 
+
+            //This is broken, im just storing latest value for second, not avg!
+            val.ticks[i].a = Number(tick.a);
+            val.ticks[i].b = Number(tick.b);
+            match = true;
+          }
+
+          tot_a += val.ticks[i].a;
+          tot_b += val.ticks[i].b;
+        }
+
+        if (match === false) {
+          val.count++;
+          tot_a += Number(tick.a);
+          tot_b += Number(tick.b);
+          val.ticks.push(tick);
+        }
+
+        val.total_a = tot_a;
+        val.total_b = tot_b;
+
+        val.avg_a = (val.total_a / val.count); 
+        val.avg_b = (val.total_b / val.count); 
+        //console.log("tot_a: " + tot_a + " tot_b: " + tot_b + " count: " + val.count + " avg_a: " + val.avg_a + " avg_b:" + val.avg_b);
+      }
+      else {
+       val.count++;
+       val.total_a = Number(val.total_a) + Number(tick.a);
+       val.total_b = Number(val.total_b) + Number(tick.b);
+       val.avg_a = (val.total_a / val.count); 
+       val.avg_b = (val.total_b / val.count); 
+       val.ticks.push(tick);
+      }
+      val.date = data.date;
       var resData = {};
       resData.key = key;
       resData.value = val;
@@ -145,6 +192,29 @@ var dbGetQueue = async.queue(function(data, callback) {
             }, 100, data, err, result);//setTimeout
          }
         }
+       else if (data.timeResolution === 'seconds') {
+
+         var sTick = {};
+         sTick.a = resData.value.avg_a;
+         sTick.b = resData.value.avg_b;
+         sTick.pair = resData.value.pair;
+         sTick.date = resData.value.date.slice(0,-4);
+
+         //console.log("sTick: \n" + JSON.stringify(sTick));
+
+        var stickData = {};
+        stickData.key = sTick.date.slice(0,-3) + tick.pair;
+        stickData.date = sTick.date;
+        stickData.timeResolution = 'minutes';
+        stickData.value = sTick;
+        stickData.opType = 'set';
+
+        //console.log("stickData: \n" + JSON.stringify(stickData));
+    dbGetQueue.push(stickData, function(err,result) {
+      //if (typeof(err) != 'undefined') { console.log(err) }
+      //console.timeEnd("processTick");
+    });
+       }
       }); 
     }
     callback(err, result);
@@ -204,10 +274,12 @@ parser._transform = function(data, encoding, done) {
 
     //Some formatting of the input data into JSON object
     var tick = this._parseRow(data);
-    //console.log(tick);
+    //console.log("tick: \n" + JSON.stringify(tick));
     var tickData = {};
 
     tickData.key = tick.date.slice(0,-4) + tick.pair;
+    tickData.date = tick.date;
+    tickData.timeResolution = 'seconds';
     tickData.value = tick;
     tickData.opType = 'set';
     //console.log(tickData);

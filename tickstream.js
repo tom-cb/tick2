@@ -22,7 +22,7 @@ var util = require('util');
 util.inherits(TickStream, Readable);
 
 var WAIT_MILLIS = 50;
-var CURRENCY_PAIRS = 25;
+var CURRENCY_PAIRS = 10;
 var MAX_TICKS = 100000;
 var CURRENCY_ONE = process.env.CURRENCY_ONE;
 var CURRENCY_TWO = process.env.CURRENCY_TWO;
