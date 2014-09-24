@@ -11,37 +11,19 @@ var CURRENCY_TWO = process.env.CURRENCY_TWO;
 var cbGet = new couchbase.Connection({host: 'localhost:8091', bucket: 'default'});
 
 var opts = {};
-/*
-var dbQueue = async.queue(function(keys, callback) {
-  console.log("running async op for keys: " + keys);
-  cbGet.getMulti(keys, opts,
-    function(err, results) {
-      for (var k in results) {
-        //console.log(k);
-        console.log(JSON.stringify(results[k], null, 4));
-      } 
-    });
-}, 10); //concurrency val for async queue
 
-function getTicksBetween(startTime, endTime, callback) {
-  var keys = [];
-
-  while (startTime.isBefore(endTime)) {
-    var dateStr = startTime.toString("yyyyMMdd HH:mm") + CURRENCY_ONE + "/" + CURRENCY_TWO;
-    console.log(dateStr);
-    //keys.push(dateStr);
-    startTime.addMinutes(1);
-  }
-
-  dbQueue.push(keys, function(err, results) { });
+function randomInt (low, high) {
+    return Math.floor(Math.random() * (high - low) + low);
 }
-*/
 
 server = http.createServer(function (request, response) {
   console.log("processing request");
 
+  // choose between 1 and 5 minutes worth of data
+  var datePeriod = randomInt(1,6);
+  console.log("rand: " + datePeriod);
   var endTime = new Date().setTimeToNow();
-  var startTime = new Date().setTimeToNow().addMinutes(-5);
+  var startTime = new Date().setTimeToNow().addMinutes(-datePeriod);
   console.log(startTime.toString());
   console.log(endTime.toString());
 
