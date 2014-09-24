@@ -54,9 +54,9 @@ var dbGetQueue = async.queue(function(data, callback) {
   // 20140921 11:03AA5/BB5 
   // I.e. a doc representing the whole of minute 11:03 for currency pair AA5/BB5
   var tick = data.value;
-  var key = tick.date.slice(0,-7) + tick.pair;
+  var key = data.key;
   //console.log(tick);
-  //console.log("key: " + key);
+  console.log("key: " + key);
 
   // Uncomment to enable tracking of time spent on db call
   //console.time("dbget" + key);
@@ -160,7 +160,7 @@ var dbQueue = async.queue(function(data, callback) {
      //console.log("setting: " + data.key);
      cbSet.set(data.key, data.value, data.setOptions, function(err, result) {
        if (err) console.log("SET FAILED: " + err);
-       if (casMismatches > 0) { 
+       if (casMismatches > 100) { 
          console.log("cas mismatches: " + casMismatches);
        }
 
@@ -206,7 +206,8 @@ parser._transform = function(data, encoding, done) {
     var tick = this._parseRow(data);
     //console.log(tick);
     var tickData = {};
-    tickData.key = tick.pair + ':' + tick.date;
+
+    tickData.key = tick.date.slice(0,-4) + tick.pair;
     tickData.value = tick;
     tickData.opType = 'set';
     //console.log(tickData);
