@@ -42,8 +42,8 @@ var addFailures = 0;
 var casMismatches = 0;
 
 // Two CB objects, one we use for Gets and one for Sets
-var cbGet = new couchbase.Connection({host: 'localhost:8091', bucket: 'default'});
-var cbSet = new couchbase.Connection({host: 'localhost:8091', bucket: 'default'});
+var cbGet = new couchbase.Connection({host: '10.32.28.212:8091', bucket: 'default'});
+var cbSet = new couchbase.Connection({host: '10.32.28.212:8091', bucket: 'default'});
 
 parser.header = null;
 parser._rawHeader = [];
@@ -274,7 +274,7 @@ parser._transform = function(data, encoding, done) {
 
     //Some formatting of the input data into JSON object
     var tick = this._parseRow(data);
-    //console.log("tick: \n" + JSON.stringify(tick));
+    console.log("tick: \n" + JSON.stringify(tick));
     var tickData = {};
 
     tickData.key = tick.date.slice(0,-4) + tick.pair;

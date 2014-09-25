@@ -6,9 +6,9 @@ require('datejs');
 
 var CURRENCY_ONE = process.env.CURRENCY_ONE;
 var CURRENCY_TWO = process.env.CURRENCY_TWO;
+var PORT = process.env.PORT;
 
-
-var cbGet = new couchbase.Connection({host: 'localhost:8091', bucket: 'default'});
+var cbGet = new couchbase.Connection({host: '10.32.28.212:8091', bucket: 'default'});
 
 var opts = {};
 
@@ -61,7 +61,7 @@ server = http.createServer(function (request, response) {
   });
 });
 
-server.listen(6666);
+server.listen(PORT);
 
 console.log("server running");
 
