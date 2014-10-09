@@ -13,12 +13,13 @@ This corresponds to:
 loader.js reads in a stream of tick data in CSV format and inserts it into DB.
 
 
-As each tick is handled, a document representing 1 minute is updated.
-All ticks within that minute will be included in the 1 doc.
-When a new minute starts, a new doc will be created.
+As each tick is handled, a document representing 1 second is updated.
+All ticks within that second will be included in the 1 doc.
+When a new second starts, a new doc will be created.
 
-It's also possible for each tick to be stored as a separate document.
-Just uncomment the appropriate lines in loader.js.
+In addition, a doc is created that has data for each minute.
+This contains a maximum of 60 values -- one representing the 'averages' for each second doc.
+
 
 
 tickstream.js generates the input data in CSV format.
