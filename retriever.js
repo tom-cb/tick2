@@ -8,9 +8,9 @@ var CURRENCY_ONE = process.env.CURRENCY_ONE;
 var CURRENCY_TWO = process.env.CURRENCY_TWO;
 var PORT = process.env.PORT;
 
-var cbGet = new couchbase.Connection({host: '10.32.28.212:8091', bucket: 'default'});
+var cbCluster = new couchbase.Cluster('couchbase://localhost');
+var cbGet = cbCluster.openBucket('default');
 
-var opts = {};
 
 function randomInt (low, high) {
     return Math.floor(Math.random() * (high - low) + low);
@@ -47,7 +47,7 @@ server = http.createServer(function (request, response) {
   }
 
   console.time('req');
-  cbGet.getMulti(keys, opts,
+  cbGet.getMulti(keys,
     function(err, results) {
       var res = '';
       for (var k in results) {

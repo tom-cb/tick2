@@ -41,9 +41,13 @@ var getFailures = 0;
 var addFailures = 0;
 var casMismatches = 0;
 
+var cbCluster = new couchbase.Cluster('couchbase://localhost');
+var cbGet = cbCluster.openBucket('default');
+var cbSet = cbCluster.openBucket('default');
+
 // Two CB objects, one we use for Gets and one for Sets
-var cbGet = new couchbase.Connection({host: '10.32.28.212:8091', bucket: 'default'});
-var cbSet = new couchbase.Connection({host: '10.32.28.212:8091', bucket: 'default'});
+//var cbGet = new couchbase.Connection({host: 'localhost:8091', bucket: 'default'});
+//var cbSet = new couchbase.Connection({host: 'localhost:8091', bucket: 'default'});
 
 parser.header = null;
 parser._rawHeader = [];
@@ -228,7 +232,8 @@ var dbQueue = async.queue(function(data, callback) {
   // console.log(data.key + " %j", data.value);
   if (data.opType === 'set') {
      //console.log("setting: " + data.key);
-     cbSet.set(data.key, data.value, data.setOptions, function(err, result) {
+	 //console.log("storing: " + data.key + data.value + data.setOptions);
+     cbSet.upsert(data.key, data.value, data.setOptions, function(err, result) {
        if (err) console.log("SET FAILED: " + err);
        if (casMismatches > 100) { 
          console.log("cas mismatches: " + casMismatches);
@@ -238,7 +243,8 @@ var dbQueue = async.queue(function(data, callback) {
      });
   } else if (data.opType === 'add') {
      //console.log("adding: " + data.key);
-     cbSet.add(data.key, data.value, function(err, result) {
+	 //console.log("storing: " + data.key + " value: " +  JSON.stringify(data.value,null, 4) );
+     cbSet.insert(data.key, data.value, function(err, result) {
        if (err) console.log("ADD FAILED: " + err);
        //console.log("add failures: " +  addFailures);
        callback(err, result);
@@ -274,7 +280,7 @@ parser._transform = function(data, encoding, done) {
 
     //Some formatting of the input data into JSON object
     var tick = this._parseRow(data);
-    console.log("tick: \n" + JSON.stringify(tick));
+    //console.log("tick: \n" + JSON.stringify(tick));
     var tickData = {};
 
     tickData.key = tick.date.slice(0,-4) + tick.pair;
